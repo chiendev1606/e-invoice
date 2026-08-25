@@ -1,0 +1,10 @@
+allowBuilds:
+  nx: true
+  unrs-resolver: true
+  esbuild: true
+  "@swc/core": true
+  "@parcel/watcher": true
+  less: true
+  "@nestjs/core": false
+autoInstallPeers: true
+strictPeerDependencies: false
