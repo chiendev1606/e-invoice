@@ -5,6 +5,15 @@
   "scripts": {
     "prepare": "husky"
   },
+  "lint-staged": {
+    "*.{ts,js}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{md,json}": [
+      "prettier --write"
+    ]
+  },
   "private": true,
   "dependencies": {
     "@nestjs/common": "^11.0.0",
@@ -38,6 +47,7 @@
     "jest": "^30.0.2",
     "jest-environment-node": "^30.0.2",
     "jest-util": "^30.0.2",
+    "lint-staged": "^17.3.0",
     "nx": "21.6.11",
     "prettier": "^2.6.2",
     "ts-jest": "^29.4.0",
