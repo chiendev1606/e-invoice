@@ -4,9 +4,10 @@
   "license": "MIT",
   "scripts": {
     "prepare": "husky",
-    "reset": "nx reset",
-    "dev": "nx reset && nx run-many -t --target=serve --projects=bff,common,configuration",
-    "dev-lite": "nx reset && nx run-many -t --target=serve --projects=bff"
+    "nx:reset": "nx reset",
+    "nx:run-many": "nx run-many",
+    "dev": "pnpm nx:reset && pnpm nx:run-many -t serve ",
+    "dev-lite": "pnpm nx:reset && pnpm nx:run-many -t serve --projects=bff"
   },
   "lint-staged": {
     "*.{ts,js,jsx,tsx}": [
@@ -23,11 +24,14 @@
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.0.0",
     "@nestjs/platform-express": "^11.0.0",
+    "@nestjs/swagger": "^11.4.7",
     "axios": "^1.6.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
+    "express": "^5.2.1",
     "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.8.0"
+    "rxjs": "^7.8.0",
+    "uuid": "^14.0.2"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.2",
@@ -47,6 +51,7 @@
     "@swc-node/register": "~1.9.1",
     "@swc/core": "~1.5.7",
     "@swc/helpers": "~0.5.11",
+    "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
     "@types/node": "20.19.9",
     "eslint": "^9.8.0",
