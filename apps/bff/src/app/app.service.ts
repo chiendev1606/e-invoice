@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
+import { ResponseDto } from '@common/interfaces/response.interface';
 
 @Injectable()
 export class AppService {
-  getData(): { message: string } {
-    return { message: 'Hello API' };
+  getData(): ResponseDto<{ message: string }> {
+    return new ResponseDto({ data: { message: 'Hello API' } });
   }
 }

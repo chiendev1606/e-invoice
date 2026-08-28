@@ -1,0 +1,24 @@
+import { HttpStatus } from '@nestjs/common';
+import { ApiProperty } from '@nestjs/swagger';
+import { HttpMessage } from '@common/constants/enums/http-messages.enum';
+
+export class ResponseDto<T> {
+  @ApiProperty()
+  data?: T;
+
+  @ApiProperty({ type: String })
+  message = HttpMessage;
+
+  @ApiProperty()
+  statusCode = HttpStatus.OK;
+
+  @ApiProperty()
+  processId?: string;
+
+  @ApiProperty()
+  duration?: string;
+
+  constructor(data: Partial<ResponseDto<T>>) {
+    Object.assign(this, data);
+  }
+}
