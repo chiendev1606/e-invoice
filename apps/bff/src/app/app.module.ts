@@ -4,6 +4,10 @@ import { ConfigModule } from '@nestjs/config';
 import { CONFIGURATION, TConfiguration } from '../configuration';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { ExceptionInterceptor } from '@common/interceptors/exception.interceptor';
+import { ClientsModule } from '@nestjs/microservices';
+import { getTcpProvider, TCP_SERVICES } from '@common/configuration/tcp.config';
 
 @Module({
   imports: [
@@ -11,9 +15,10 @@ import { AppService } from './app.service';
       isGlobal: true,
       load: [() => CONFIGURATION],
     }),
+    ClientsModule.registerAsync(getTcpProvider(TCP_SERVICES.INVOICES)),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, { provide: APP_INTERCEPTOR, useClass: ExceptionInterceptor }],
 })
 export class AppModule {
   static CONFIGURATION: TConfiguration = CONFIGURATION;

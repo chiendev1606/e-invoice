@@ -11,6 +11,11 @@ class Configuration extends AppConfiguration {
   @ValidateNested()
   @Type(() => TCPConfiguration)
   TCP_SERVICES = new TCPConfiguration();
+
+  constructor() {
+    super();
+    this.APP_CONFIG.PORT = Number(process.env.INVOICE_PORT);
+  }
 }
 
 export const CONFIGURATION = new Configuration();

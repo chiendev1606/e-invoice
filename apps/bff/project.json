@@ -22,10 +22,7 @@
       "dependsOn": ["build"],
       "cache": true,
       "executor": "@nx/js:prune-lockfile",
-      "outputs": [
-        "{workspaceRoot}/dist/apps/bff/package.json",
-        "{workspaceRoot}/dist/apps/bff/pnpm-lock.yaml"
-      ],
+      "outputs": ["{workspaceRoot}/dist/apps/bff/package.json", "{workspaceRoot}/dist/apps/bff/pnpm-lock.yaml"],
       "options": {
         "buildTarget": "build"
       }
@@ -47,7 +44,6 @@
       "continuous": true,
       "executor": "@nx/js:node",
       "defaultConfiguration": "development",
-      "dependsOn": ["build"],
       "options": {
         "buildTarget": "bff:build",
         "runBuildTargetDependencies": false

@@ -6,7 +6,7 @@
     "prepare": "husky",
     "nx:reset": "nx reset",
     "nx:run-many": "nx run-many",
-    "dev": "pnpm nx:reset && pnpm nx:run-many -t serve ",
+    "dev": "pnpm nx:reset && pnpm nx:run-many -t serve",
     "dev-lite": "pnpm nx:reset && pnpm nx:run-many -t serve --projects=bff"
   },
   "lint-staged": {
@@ -23,6 +23,7 @@
     "@nestjs/common": "^11.0.0",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.0.0",
+    "@nestjs/microservices": "^11.2.3",
     "@nestjs/platform-express": "^11.0.0",
     "@nestjs/swagger": "^11.4.7",
     "axios": "^1.6.0",

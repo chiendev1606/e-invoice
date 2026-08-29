@@ -7,13 +7,13 @@ export class ResponseDto<T> {
   data?: T;
 
   @ApiProperty({ type: String })
-  message = HttpMessage;
+  message = HttpMessage.OK;
 
   @ApiProperty()
   statusCode = HttpStatus.OK;
 
   @ApiProperty()
-  processId?: string;
+  processID?: string;
 
   @ApiProperty()
   duration?: string;
