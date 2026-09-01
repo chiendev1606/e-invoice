@@ -1,5 +1,5 @@
 import { ClientProvider, TcpClientOptions, Transport } from '@nestjs/microservices';
-import { ClientsModuleAsyncOptions } from '@nestjs/microservices/module/interfaces';
+import { ClientsModuleAsyncOptions } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
 import { IsNotEmpty, IsObject } from 'class-validator';
 

@@ -8,6 +8,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ExceptionInterceptor } from '@common/interceptors/exception.interceptor';
 import { ClientsModule } from '@nestjs/microservices';
 import { getTcpProvider, TCP_SERVICES } from '@common/configuration/tcp.config';
+import { getMongoDbProvider } from '@common/configuration/mongo.config';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { getTcpProvider, TCP_SERVICES } from '@common/configuration/tcp.config';
       load: [() => CONFIGURATION],
     }),
     ClientsModule.registerAsync(getTcpProvider(TCP_SERVICES.INVOICES)),
+    getMongoDbProvider(),
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_INTERCEPTOR, useClass: ExceptionInterceptor }],
