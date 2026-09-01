@@ -15,7 +15,6 @@ export class AppController {
 
   @MessagePattern('get_invoice')
   getInvoice(data: RequestTCPType<string>): ResponseTCP<string> {
-    console.log(data);
     return ResponseTCP.success(data.data);
   }
 }

@@ -4,6 +4,7 @@ import { ResponseDto } from '@common/interfaces/gate-way/response.interface';
 import { TCP_SERVICES } from '@common/configuration/tcp.config';
 import { TCPClient } from '@common/interfaces/tcp/tcp-client.interface';
 import { map } from 'rxjs/operators';
+import { ProcessID } from '@common/decorators/processID.decorator';
 
 @Controller('/app')
 export class AppController {
@@ -18,10 +19,10 @@ export class AppController {
   }
 
   @Get('invoice')
-  async getInvoice() {
+  async getInvoice(@ProcessID() processID: string) {
     return this.invoiceClient
       .send<string, string>('get_invoice', {
-        processID: '123',
+        processID,
         data: '1',
       })
       .pipe(
