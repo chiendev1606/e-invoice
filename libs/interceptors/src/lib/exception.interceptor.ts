@@ -1,4 +1,7 @@
 // src/common/interceptors/logging.interceptor.ts
+import { MetadataKeys } from '@common/constants/common.constant';
+import { HttpMessage } from '@common/constants/enums/http-messages.enum';
+import { ResponseDto } from '@common/interfaces/gate-way/response.interface';
 import {
   CallHandler,
   ExecutionContext,
@@ -8,16 +11,11 @@ import {
   Logger,
   NestInterceptor,
 } from '@nestjs/common';
-import { Observable, map, catchError } from 'rxjs';
 import type { Request } from 'express';
-import { MetadataKeys } from '@common/constants/common.constant';
-import { HttpMessage } from '@common/constants/enums/http-messages.enum';
-import { ResponseDto } from '@common/interfaces/response.interface';
+import { Observable, catchError, map } from 'rxjs';
 
 @Injectable()
 export class ExceptionInterceptor implements NestInterceptor {
-  private readonly logger = new Logger(ExceptionInterceptor.name);
-
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const request = context.switchToHttp().getRequest<Request>();
     const startTime = (request as any)[MetadataKeys.startTime];

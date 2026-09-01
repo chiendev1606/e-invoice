@@ -1,15 +1,15 @@
 import { Controller, Get, Inject } from '@nestjs/common';
 import { AppService } from './app.service';
-import { ClientProxy } from '@nestjs/microservices';
-import { firstValueFrom } from 'rxjs';
-import { ResponseDto } from '@common/interfaces/response.interface';
+import { ResponseDto } from '@common/interfaces/gate-way/response.interface';
 import { TCP_SERVICES } from '@common/configuration/tcp.config';
+import { TCPClient } from '@common/interfaces/tcp/tcp-client.interface';
+import { map } from 'rxjs/operators';
 
 @Controller('/app')
 export class AppController {
   constructor(
     private readonly appService: AppService,
-    @Inject(TCP_SERVICES.INVOICES) private readonly invoiceClient: ClientProxy,
+    @Inject(TCP_SERVICES.INVOICES) private readonly invoiceClient: TCPClient,
   ) {}
 
   @Get()
@@ -19,7 +19,16 @@ export class AppController {
 
   @Get('invoice')
   async getInvoice() {
-    const invoiceID = await firstValueFrom(this.invoiceClient.send<string, number>('get_invoice', 1));
-    return new ResponseDto({ data: invoiceID });
+    return this.invoiceClient
+      .send<string, string>('get_invoice', {
+        processID: '123',
+        data: '1',
+      })
+      .pipe(
+        map((res) => {
+          console.log(res);
+          return new ResponseDto({ data: res.data });
+        }),
+      );
   }
 }

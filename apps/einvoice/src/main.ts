@@ -11,16 +11,19 @@ import { TCP_SERVICES } from '@common/configuration/tcp.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.connectMicroservice({
-    transport: Transport.TCP,
-    options: {
-      host: AppModule.APP_CONFIGURATION.TCP_SERVICES[TCP_SERVICES.INVOICES].options.host,
-      port: AppModule.APP_CONFIGURATION.TCP_SERVICES[TCP_SERVICES.INVOICES].options.port,
+  app.connectMicroservice(
+    {
+      transport: Transport.TCP,
+      options: {
+        host: AppModule.APP_CONFIGURATION.TCP_SERVICES[TCP_SERVICES.INVOICES].options?.host,
+        port: AppModule.APP_CONFIGURATION.TCP_SERVICES[TCP_SERVICES.INVOICES].options?.port,
+      },
     },
-  });
+    { inheritAppConfig: true },
+  );
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);
-  const port = AppModule.APP_CONFIGURATION.PORT;
+  const port = process.env.INVOICE_PORT || 3000;
 
   await app.startAllMicroservices();
 
