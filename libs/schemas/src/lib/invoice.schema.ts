@@ -2,7 +2,7 @@ import { Prop, Schema } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { BaseSchema, createSchema } from './base.schema';
 
-class Client {
+export class Client {
   @Prop({ type: String })
   name: string;
   @Prop({ type: String })
@@ -11,13 +11,13 @@ class Client {
   email: string;
 }
 
-enum InvoiceStatus {
+export enum InvoiceStatus {
   CREATED = 'CREATED',
   SENT = 'SENT',
   PAID = 'PAID',
 }
 
-class Item {
+export class Item {
   @Prop({ type: String })
   productId: string;
 
@@ -55,6 +55,12 @@ export class Invoice extends BaseSchema {
 
   @Prop({ type: [Item] })
   items: Item[];
+
+  @Prop({ type: String })
+  supervisorId: string;
+
+  @Prop({ type: String })
+  fileUrl: string;
 }
 
 const InvoiceSchema = createSchema(Invoice);

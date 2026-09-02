@@ -1,4 +1,3 @@
-import { Type } from '@nestjs/common';
 import { Prop, SchemaFactory, Virtual } from '@nestjs/mongoose';
 import { ObjectId } from 'mongodb';
 
@@ -17,7 +16,7 @@ export class BaseSchema {
   updatedAt: Date;
 }
 
-export const createSchema = <T = any>(schemaDefinition: Type<T>) => {
+export const createSchema = <T = any>(schemaDefinition: any) => {
   const schema = SchemaFactory.createForClass(schemaDefinition);
   schema.set('toJSON', { virtuals: true });
   schema.set('toObject', { virtuals: true });
