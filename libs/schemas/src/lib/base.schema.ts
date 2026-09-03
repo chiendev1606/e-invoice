@@ -1,8 +1,7 @@
 import { Prop, SchemaFactory, Virtual } from '@nestjs/mongoose';
-import { ObjectId } from 'mongodb';
 
 export class BaseSchema {
-  _id: ObjectId;
+  _id: string;
 
   @Virtual({
     get: (docs: any) => docs._id.toHexString(),

@@ -1,13 +1,13 @@
-import { Controller, Get, Inject } from '@nestjs/common';
-import { ResponseDto } from '@common/interfaces/gate-way/response.interface';
 import { TCP_SERVICES } from '@common/configuration/tcp.config';
-import { TCPClient } from '@common/interfaces/tcp/tcp-client.interface';
-import { map } from 'rxjs/operators';
-import { ProcessID } from '@common/decorators/processID.decorator';
-import { InvoiceService } from '../services/invoice.service';
-import { MessagePattern } from '@nestjs/microservices';
+import { InvoicePattern } from '@common/constants/enums/tcp-patterns.enum';
+import { CreateInvoiceTCPRequestType, CreateInvoiceTCPResponseType } from '@common/interfaces/tcp/invoice.interface';
 import { RequestTCPType } from '@common/interfaces/tcp/request.interface';
 import { ResponseTCP } from '@common/interfaces/tcp/response.interface';
+import { TCPClient } from '@common/interfaces/tcp/tcp-client.interface';
+import { Controller, Inject } from '@nestjs/common';
+import { MessagePattern } from '@nestjs/microservices';
+import { InvoiceService } from '../services/invoice.service';
+import { mapper } from '../../../mappers/invoice.mapper';
 
 @Controller('/invoices')
 export class InvoiceController {
@@ -16,8 +16,8 @@ export class InvoiceController {
     @Inject(TCP_SERVICES.INVOICES) private readonly invoiceClient: TCPClient,
   ) {}
 
-  @MessagePattern('get_invoice')
-  getInvoice(data: RequestTCPType<string>): ResponseTCP<string> {
-    return ResponseTCP.success(data.data);
+  @MessagePattern(InvoicePattern.CREATE)
+  createInvoice(data: RequestTCPType<CreateInvoiceTCPRequestType>): ResponseTCP<CreateInvoiceTCPResponseType> {
+    return ResponseTCP.success(mapper(data.data));
   }
 }
