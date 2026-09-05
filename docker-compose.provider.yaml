@@ -1,5 +1,10 @@
 name: e-invoice-provider
 
+networks:
+  e-invoice-nw:
+    driver: bridge
+    name: e-invoice-nw
+
 services:
   mongo:
     image: mongo
@@ -12,3 +17,36 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: user
       MONGO_INITDB_ROOT_PASSWORD: password
+    networks:
+      - e-invoice-nw
+  postgres:
+    image: postgres:18
+    container_name: postgres_db
+    volumes:
+      # PG18+ stores data in a major-version subdir (/var/lib/postgresql/18/docker),
+      # so the mount must sit at /var/lib/postgresql, not /var/lib/postgresql/data.
+      - ./docker/docker_data/postgres_data:/var/lib/postgresql
+    restart: unless-stopped
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: e-invoice-app
+    networks:
+      - e-invoice-nw
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin_ui
+    restart: unless-stopped
+    ports:
+      - 5050:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@pgadmin.org
+      PGADMIN_DEFAULT_PASSWORD: admin
+    depends_on:
+      - postgres
+    networks:
+      - e-invoice-nw
+    volumes:
+      - ./docker/docker_data/pgadmin_data:/var/lib/pgadmin
