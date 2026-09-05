@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { CONFIGURATION } from '../configuration';
-import { getTypeOrmProvider } from '@common/configuration/type-orm.config';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { ProductModule } from './modules/product/product.module';
 
 @Module({
   imports: [
@@ -11,7 +11,7 @@ import { getTypeOrmProvider } from '@common/configuration/type-orm.config';
       isGlobal: true,
       load: [() => CONFIGURATION],
     }),
-    getTypeOrmProvider(),
+    ProductModule,
   ],
   controllers: [AppController],
   providers: [AppService],
