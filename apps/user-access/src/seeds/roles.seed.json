@@ -1,0 +1,14 @@
+{
+  "roles": [
+    {
+      "roleName": "ADMIN",
+      "description": "Full access to every module. Reserved for system administrators.",
+      "permissions": ["*"]
+    },
+    {
+      "roleName": "USER",
+      "description": "Default role: can read products and manage own invoices.",
+      "permissions": ["invoice.get", "invoice.list", "invoice.create", "invoice.update", "product.get", "product.list"]
+    }
+  ]
+}

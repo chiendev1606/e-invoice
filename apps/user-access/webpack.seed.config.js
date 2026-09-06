@@ -7,21 +7,17 @@ module.exports = {
     alias: commonAliases(__dirname),
   },
   output: {
-    path: join(__dirname, '../../dist/apps/user-access'),
-    ...(process.env.NODE_ENV !== 'production' && {
-      devtoolModuleFilenameTemplate: '[absolute-resource-path]',
-    }),
+    path: join(__dirname, '../../dist/apps/user-access-seed'),
   },
   plugins: [
     new NxAppWebpackPlugin({
       target: 'node',
       compiler: 'tsc',
-      main: './src/main.ts',
+      main: './src/seed.ts',
       tsConfig: './tsconfig.app.json',
-      assets: ['./src/assets'],
       optimization: false,
       outputHashing: 'none',
-      generatePackageJson: true,
+      generatePackageJson: false,
       sourceMaps: true,
     }),
   ],

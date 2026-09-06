@@ -65,6 +65,23 @@
       "options": {
         "passWithNoTests": true
       }
+    },
+    "build-seed": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "webpack-cli build --config webpack.seed.config.js",
+        "args": ["--node-env=production"],
+        "cwd": "apps/user-access"
+      }
+    },
+    "seed": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build-seed"],
+      "options": {
+        "command": "node ../../dist/apps/user-access-seed/main.js",
+        "cwd": "apps/user-access",
+        "forwardAllArgs": true
+      }
     }
   }
 }
