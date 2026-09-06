@@ -6,6 +6,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { CONFIGURATION, TConfiguration } from '../configuration';
 import { AppService } from './app.service';
 import { InvoiceModule } from './modules/invoice/invoice.module';
+import { ProductModule } from './modules/product/product.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { InvoiceModule } from './modules/invoice/invoice.module';
       load: [() => CONFIGURATION],
     }),
     InvoiceModule,
+    ProductModule,
   ],
   providers: [AppService, { provide: APP_INTERCEPTOR, useClass: ExceptionInterceptor }],
 })

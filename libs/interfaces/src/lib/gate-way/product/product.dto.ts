@@ -5,25 +5,31 @@ import { ApiProperty } from '@nestjs/swagger';
 export class CreateProductRequestDto {
   @IsNotEmpty()
   @IsString()
+  @ApiProperty()
   name: string;
 
   @IsString()
   @IsOptional()
+  @ApiProperty()
   description?: string;
 
   @IsNotEmpty()
   @IsString()
+  @ApiProperty()
   sku: string;
 
   @IsNotEmpty()
   @IsString()
+  @ApiProperty()
   unit: string;
 
   @IsNotEmpty()
   @IsNumber()
+  @ApiProperty()
   price: number;
 
   @IsNotEmpty()
+  @ApiProperty()
   @IsNumber()
   vatRate: number;
 }

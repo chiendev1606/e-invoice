@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ProductRepository } from '../repositories/product.repository';
+import { CreateProductRequestDto } from '@common/interfaces/gate-way/product/product.dto';
 
 @Injectable()
 export class ProductService {
@@ -7,5 +8,9 @@ export class ProductService {
 
   getAllProduct() {
     return this.productRepository.getAll();
+  }
+
+  createProduct(createProductRequestDto: CreateProductRequestDto) {
+    return this.productRepository.create(createProductRequestDto);
   }
 }

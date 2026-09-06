@@ -7,7 +7,12 @@
     "nx:reset": "nx reset",
     "nx:run-many": "nx run-many",
     "dev": "pnpm nx:reset && pnpm nx:run-many -t serve",
-    "dev-lite": "pnpm nx:reset && pnpm nx:run-many -t serve --projects=bff"
+    "dev-lite": "pnpm nx:reset && pnpm nx:run-many -t serve --projects=bff",
+    "typeorm": "TS_NODE_PROJECT=database/tsconfig.json node --env-file-if-exists=.env node_modules/typeorm/cli-ts-node-commonjs.js -d database/data-source.ts",
+    "migration:generate": "pnpm typeorm migration:generate",
+    "migration:run": "pnpm typeorm migration:run",
+    "migration:revert": "pnpm typeorm migration:revert",
+    "migration:show": "pnpm typeorm migration:show"
   },
   "lint-staged": {
     "*.{ts,js,jsx,tsx}": [

@@ -1,7 +1,7 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { DatabaseType } from 'typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { DatabaseType } from 'typeorm';
 
 export class TypeOrmConfig {
   @IsNotEmpty()
@@ -50,7 +50,8 @@ export const getTypeOrmProvider = () => {
         username: config.get('TYPE_ORM_CONFIG.USERNAME'),
         password: config.get('TYPE_ORM_CONFIG.PASSWORD'),
         database: config.get('TYPE_ORM_CONFIG.DATABASE'),
-        entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+        autoLoadEntities: true,
+        synchronize: false,
       } as TypeOrmModuleOptions),
   });
 };

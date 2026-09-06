@@ -16,4 +16,6 @@ import { ProductModule } from './modules/product/product.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+  static APP_CONFIGURATION = CONFIGURATION;
+}
