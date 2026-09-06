@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { TcpLoggingInterceptor } from '@common/interceptors/tcp-logging.interceptor';
 import { ConfigModule } from '@nestjs/config';
 import { CONFIGURATION } from '../configuration';
 import { AppController } from './app.controller';
@@ -14,7 +16,7 @@ import { ProductModule } from './modules/product/product.module';
     ProductModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, { provide: APP_INTERCEPTOR, useClass: TcpLoggingInterceptor }],
 })
 export class AppModule {
   static APP_CONFIGURATION = CONFIGURATION;

@@ -13,7 +13,6 @@ export class ProductController {
   @Post()
   @ApiProperty({ type: CreateProductResponseDto })
   createProduct(@Body() createProductRequestDto: CreateProductRequestDto, @ProcessID() processID: string) {
-    console.log(createProductRequestDto);
     return this.productClient.send<CreateProductResponseDto, CreateProductRequestDto>(ProductPattern.CREATE, {
       data: createProductRequestDto,
       processID,

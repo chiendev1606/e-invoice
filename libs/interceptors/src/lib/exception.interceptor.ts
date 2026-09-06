@@ -32,7 +32,7 @@ export class ExceptionInterceptor implements NestInterceptor {
         const duration = (Date.now() - startTime).toString();
         const message = error?.response?.message || error.message || error || HttpMessage.INTERNAL_SERVER_ERROR;
         const statusCode = Number(
-          error.code || error.statusCode || error.response.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
+          error.code || error.statusCode || error.response?.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
         );
         throw new HttpException(new ResponseDto({ message, processID, data: null, duration, statusCode }), statusCode);
       }),
