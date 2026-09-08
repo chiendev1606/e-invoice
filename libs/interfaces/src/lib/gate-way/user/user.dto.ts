@@ -1,24 +1,31 @@
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { ArrayNotEmpty, IsArray, IsEmail, IsMongoId, IsNotEmpty, IsString } from 'class-validator';
 
-export class CreateUserDto {
+export class CreateUserRequestDto {
   @IsString()
   @IsNotEmpty()
+  @ApiProperty()
   firstName: string;
 
   @IsString()
   @IsNotEmpty()
+  @ApiProperty()
   lastName: string;
 
-  @IsString()
-  @IsNotEmpty()
   @IsEmail()
+  @IsNotEmpty()
+  @ApiProperty()
   email: string;
 
   @IsString()
   @IsNotEmpty()
+  @ApiProperty()
   userId: string;
 
-  @IsString({ each: true })
-  @IsNotEmpty({ each: true })
+  /** Role `_id` values — must be castable to ObjectId before they reach the schema. */
+  @IsMongoId({ each: true })
+  @ArrayNotEmpty()
+  @IsArray()
+  @ApiProperty({ type: [String], example: ['507f1f77bcf86cd799439011'] })
   roles: string[];
 }

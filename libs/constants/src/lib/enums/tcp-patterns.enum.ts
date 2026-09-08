@@ -13,3 +13,11 @@ export enum ProductPattern {
   UPDATE = 'product.update',
   DELETE = 'product.delete',
 }
+
+export enum UserPattern {
+  GET = 'user.get',
+  LIST = 'user.list',
+  CREATE = 'user.create',
+  UPDATE = 'user.update',
+  DELETE = 'user.delete',
+}
