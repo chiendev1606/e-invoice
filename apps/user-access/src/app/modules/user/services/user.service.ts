@@ -13,7 +13,6 @@ export class UserService {
       firstName: data.firstName,
       lastName: data.lastName,
       email: data.email,
-      userId: data.userId,
       roles: data.roles.map((role) => this.toRoleId(role)),
     });
   }

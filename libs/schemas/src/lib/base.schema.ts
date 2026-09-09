@@ -4,7 +4,7 @@ export class BaseSchema {
   _id: string;
 
   @Virtual({
-    get: (docs: any) => docs._id.toHexString(),
+    get: (docs: any) => (docs?._id ? docs?._id.toHexString() : undefined),
   })
   id: string;
 

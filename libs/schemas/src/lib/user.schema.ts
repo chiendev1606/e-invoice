@@ -1,7 +1,6 @@
 import { Prop, Schema } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
 import { BaseSchema, createSchema } from './base.schema';
-import { Types } from 'mongoose';
-import { Model } from 'mongoose';
 
 @Schema({
   timestamps: true,
@@ -16,9 +15,6 @@ export class User extends BaseSchema {
 
   @Prop({ type: String, unique: true })
   email: string;
-
-  @Prop({ type: String })
-  userId: string;
 
   @Prop({ type: [Types.ObjectId], ref: 'Role' })
   roles: Types.ObjectId[];

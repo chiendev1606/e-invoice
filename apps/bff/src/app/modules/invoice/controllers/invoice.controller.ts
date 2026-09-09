@@ -8,6 +8,7 @@ import { TCPClient } from '@common/interfaces/tcp/tcp-client.interface';
 import { Invoice } from '@common/schemas/invoice.schema';
 import { Body, Controller, Inject, Post } from '@nestjs/common';
 import { map } from 'rxjs/operators';
+
 @Controller('invoices')
 export class InvoiceController {
   constructor(@Inject(TCP_SERVICES.INVOICES) private readonly invoiceClient: TCPClient) {}

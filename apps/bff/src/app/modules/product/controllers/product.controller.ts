@@ -10,6 +10,7 @@ import { ApiProperty, ApiTags } from '@nestjs/swagger';
 @Controller('/product')
 export class ProductController {
   constructor(@Inject(TCP_SERVICES.PRODUCTS) private readonly productClient: TCPClient) {}
+
   @Post()
   @ApiProperty({ type: CreateProductResponseDto })
   createProduct(@Body() createProductRequestDto: CreateProductRequestDto, @ProcessID() processID: string) {

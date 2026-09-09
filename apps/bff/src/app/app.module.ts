@@ -7,6 +7,7 @@ import { CONFIGURATION, TConfiguration } from '../configuration';
 import { AppService } from './app.service';
 import { InvoiceModule } from './modules/invoice/invoice.module';
 import { ProductModule } from './modules/product/product.module';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { ProductModule } from './modules/product/product.module';
     }),
     InvoiceModule,
     ProductModule,
+    UserModule,
   ],
   providers: [AppService, { provide: APP_INTERCEPTOR, useClass: ExceptionInterceptor }],
 })

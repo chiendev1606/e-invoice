@@ -7,9 +7,15 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { UserDestination } from '@common/schemas/user.schema';
 import { getMongoDbProvider } from '@common/configuration/mongo.config';
 import { ClientsModule } from '@nestjs/microservices';
+import { ConfigModule } from '@nestjs/config';
+import { CONFIGURATION } from '../../../configuration';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [() => CONFIGURATION],
+    }),
     ClientsModule.registerAsync(getTcpProvider(TCP_SERVICES.USER_ACCESS)),
     getMongoDbProvider(),
     MongooseModule.forFeature([UserDestination]),
