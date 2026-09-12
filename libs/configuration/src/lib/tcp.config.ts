@@ -7,6 +7,7 @@ export enum TCP_SERVICES {
   INVOICES = 'INVOICES',
   PRODUCTS = 'PRODUCTS',
   USER_ACCESS = 'USER_ACCESS',
+  AUTHORIZER = 'AUTHORIZER',
 }
 
 export class TCPConfiguration {
@@ -15,6 +16,7 @@ export class TCPConfiguration {
   [TCP_SERVICES.INVOICES]: TcpClientOptions;
   [TCP_SERVICES.PRODUCTS]: TcpClientOptions;
   [TCP_SERVICES.USER_ACCESS]: TcpClientOptions;
+  [TCP_SERVICES.AUTHORIZER]: TcpClientOptions;
   constructor() {
     Object.entries(TCP_SERVICES).forEach(([key, serviceName]) => {
       this[serviceName] = TCPConfiguration.setValue({

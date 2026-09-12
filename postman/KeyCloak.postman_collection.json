@@ -1,0 +1,428 @@
+{
+  "info": {
+    "_postman_id": "9c6b42c7-0e1d-4325-8333-6a0cecc4afc4",
+    "name": "KeyCloak",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "16251815"
+  },
+  "item": [
+    {
+      "name": "Profile",
+      "item": [
+        {
+          "name": "registration",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"username\": \"james2\",\r\n    \"password\": \"12345678\",\r\n    \"email\": \"james+02@yopmail.com\",\r\n    \"firstName\": \"James\",\r\n    \"lastName\": \"Bond\",\r\n    \"dob\": \"2000-04-08\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{profileUrl}}/register",
+              "host": ["{{profileUrl}}"],
+              "path": ["register"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get All Profiles",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{profileUrl}}/profile/profiles",
+              "host": ["{{profileUrl}}"],
+              "path": ["profile", "profiles"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "discovery Endpoint",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/realms/{{realm}}/.well-known/openid-configuration",
+          "host": ["{{baseUrl}}"],
+          "path": ["realms", "{{realm}}", ".well-known", "openid-configuration"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "exchange Token",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    var data = pm.response.json();",
+              "    if (data.access_token) {",
+              "        pm.environment.set(\"accessToken\", data.access_token);",
+              "        console.log(\"✅ accessToken đã được cập nhật vào environment\");",
+              "    }",
+              "    if (data.refresh_token) {",
+              "        pm.environment.set(\"refreshToken\", data.refresh_token);",
+              "    }",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "grant_type",
+              "value": "password",
+              "type": "text"
+            },
+            {
+              "key": "client_id",
+              "value": "{{clientId}}",
+              "type": "text"
+            },
+            {
+              "key": "client_secret",
+              "value": "{{clientSecret}}",
+              "type": "text"
+            },
+            {
+              "key": "username",
+              "value": "{{username}}",
+              "type": "text"
+            },
+            {
+              "key": "password",
+              "value": "{{password}}",
+              "type": "text"
+            },
+            {
+              "key": "scope",
+              "value": "openid",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/realms/{{realm}}/protocol/openid-connect/token",
+          "host": ["{{baseUrl}}"],
+          "path": ["realms", "{{realm}}", "protocol", "openid-connect", "token"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get UserInfo",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/realms/{{realm}}/protocol/openid-connect/userinfo",
+          "host": ["{{baseUrl}}"],
+          "path": ["realms", "{{realm}}", "protocol", "openid-connect", "userinfo"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "exchange Client Token",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    var data = pm.response.json();",
+              "    if (data.access_token) {",
+              "        pm.environment.set(\"clientToken\", data.access_token);",
+              "        console.log(\"✅ clientToken đã được cập nhật vào environment\");",
+              "    }",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "grant_type",
+              "value": "client_credentials",
+              "type": "text"
+            },
+            {
+              "key": "client_id",
+              "value": "{{clientId}}",
+              "type": "text"
+            },
+            {
+              "key": "client_secret",
+              "value": "{{clientSecret}}",
+              "type": "text"
+            },
+            {
+              "key": "scope",
+              "value": "openid",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/realms/{{realm}}/protocol/openid-connect/token",
+          "host": ["{{baseUrl}}"],
+          "path": ["realms", "{{realm}}", "protocol", "openid-connect", "token"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "create User",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code === 201) {",
+              "    var location = pm.response.headers.get(\"Location\");",
+              "    if (location) {",
+              "        var userId = location.split(\"/\").pop();",
+              "        pm.environment.set(\"userId\", userId);",
+              "        console.log(\"✅ Tạo user thành công. Đã lưu userId: \" + userId);",
+              "    }",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{clientToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"username\": \"johndoe1\",\r\n    \"enabled\": true,\r\n    \"email\": \"johndoe1@yopmail.com\",\r\n    \"emailVerified\": true,\r\n    \"firstName\": \"John\",\r\n    \"lastName\": \"Doe\",\r\n    \"credentials\": [\r\n        {\r\n            \"type\": \"password\",\r\n            \"value\": \"123456\",\r\n            \"temporary\": false\r\n        }\r\n    ]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/admin/realms/{{realm}}/users",
+          "host": ["{{baseUrl}}"],
+          "path": ["admin", "realms", "{{realm}}", "users"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get Users",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{clientToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/admin/realms/{{realm}}/users?exact=false",
+          "host": ["{{baseUrl}}"],
+          "path": ["admin", "realms", "{{realm}}", "users"],
+          "query": [
+            {
+              "key": "exact",
+              "value": "false"
+            },
+            {
+              "key": "email",
+              "value": "john",
+              "disabled": true
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get Detail User",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{clientToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/admin/realms/{{realm}}/users/{{userId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["admin", "realms", "{{realm}}", "users", "{{userId}}"],
+          "query": [
+            {
+              "key": "email",
+              "value": "john",
+              "disabled": true
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get Users Credential",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{clientToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/admin/realms/{{realm}}/users/{{userId}}/credentials",
+          "host": ["{{baseUrl}}"],
+          "path": ["admin", "realms", "{{realm}}", "users", "{{userId}}", "credentials"],
+          "query": [
+            {
+              "key": "email",
+              "value": "john",
+              "disabled": true
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "delete User",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{clientToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/admin/realms/{{realm}}/users/{{userId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["admin", "realms", "{{realm}}", "users", "{{userId}}"]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "realm",
+      "value": "ltfullstack"
+    },
+    {
+      "key": "clientId",
+      "value": "ltfullstack_app"
+    },
+    {
+      "key": "clientSecret",
+      "value": ""
+    },
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8180"
+    },
+    {
+      "key": "profileUrl",
+      "value": "http://localhost:9005"
+    }
+  ]
+}
