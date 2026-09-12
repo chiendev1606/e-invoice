@@ -50,3 +50,25 @@ services:
       - e-invoice-nw
     volumes:
       - ./docker/docker_data/pgadmin_data:/var/lib/pgadmin
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.5.2
+    container_name: keycloak_sso
+    # start-dev serves plain HTTP and skips the strict hostname checks that "start"
+    # enforces. Local development only; a real deployment uses "start" behind TLS.
+    command: start-dev
+    restart: unless-stopped
+    ports:
+      - 8080:8080
+    volumes:
+      # start-dev with no KC_DB keeps everything in the embedded H2 store under
+      # this directory (h2/keycloakdb.mv.db), so realms, users and clients live in
+      # the bind mount and are lost if it is deleted. This is also where realm files
+      # dropped into data/import are read from when starting with --import-realm.
+      - ./docker/docker_data/keycloak_data:/opt/keycloak/data
+    environment:
+      # Initial admin account, created once on the first boot against an empty database.
+      # Renamed from KEYCLOAK_ADMIN/KEYCLOAK_ADMIN_PASSWORD in Keycloak 26.
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    networks:
+      - e-invoice-nw

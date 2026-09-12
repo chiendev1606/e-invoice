@@ -1,0 +1,663 @@
+{
+  "info": {
+    "name": "E-Invoice — Keycloak Standard Flow",
+    "description": "Authorization Code flow (Standard Flow, no PKCE) against Keycloak 26.5.2, plus the BFF endpoints that consume the resulting access token.\n\nRun the requests in order: Discovery -> Authorize -> Exchange Code -> everything else. Every URL is built from the {{keycloak_base_url}}, {{realm}} and {{bff_base_url}} variables, so pointing this collection at another environment only means editing those variables.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "01 - Keycloak OIDC",
+      "description": "The Standard Flow end to end. Keycloak issues the authorization code in the browser; requests 4 onwards run entirely in Postman.",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Fail with a readable message instead of firing a request at an empty host.",
+              "const missing = ['keycloak_base_url', 'realm', 'client_id'].filter((name) => !pm.variables.get(name));",
+              "if (missing.length) {",
+              "  throw new Error('Missing variable(s): ' + missing.join(', ') + '. Select the \"E-Invoice — Local\" environment and fill them in.');",
+              "}"
+            ]
+          }
+        }
+      ],
+      "item": [
+        {
+          "name": "1. Discovery — OpenID configuration",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{keycloak_base_url}}/realms/{{realm}}/.well-known/openid-configuration",
+              "host": ["{{keycloak_base_url}}"],
+              "path": ["realms", "{{realm}}", ".well-known", "openid-configuration"]
+            },
+            "description": "Confirms the realm exists and that the endpoints this collection hardcodes match what the server advertises."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('realm is reachable', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code !== 200) { return; }",
+                  "",
+                  "const body = pm.response.json();",
+                  "pm.environment.set('issuer', body.issuer);",
+                  "",
+                  "pm.test('supports the authorization code grant', () => {",
+                  "  pm.expect(body.grant_types_supported).to.include('authorization_code');",
+                  "});",
+                  "",
+                  "// The collection builds its own URLs; this asserts that assumption still holds.",
+                  "// Compare paths only, so a trailing slash or a localhost/127.0.0.1 mismatch does not",
+                  "// fail the test for a reason that has nothing to do with the endpoint layout.",
+                  "const expected = '/realms/' + pm.variables.get('realm') + '/protocol/openid-connect';",
+                  "const pathOf = (url) => { try { return new URL(url).pathname; } catch { return url; } };",
+                  "pm.test('endpoints match the paths used by this collection', () => {",
+                  "  pm.expect(pathOf(body.authorization_endpoint)).to.eql(expected + '/auth');",
+                  "  pm.expect(pathOf(body.token_endpoint)).to.eql(expected + '/token');",
+                  "  pm.expect(pathOf(body.userinfo_endpoint)).to.eql(expected + '/userinfo');",
+                  "  pm.expect(pathOf(body.introspection_endpoint)).to.eql(expected + '/token/introspect');",
+                  "  pm.expect(pathOf(body.end_session_endpoint)).to.eql(expected + '/logout');",
+                  "});",
+                  "",
+                  "if (body.issuer !== pm.variables.get('keycloak_base_url') + '/realms/' + pm.variables.get('realm')) {",
+                  "  console.warn('Issuer is ' + body.issuer + ' but keycloak_base_url points elsewhere. Tokens carry the issuer above, which matters once a resource server validates them.');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "2. JWKS — realm signing keys",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{keycloak_base_url}}/realms/{{realm}}/protocol/openid-connect/certs",
+              "host": ["{{keycloak_base_url}}"],
+              "path": ["realms", "{{realm}}", "protocol", "openid-connect", "certs"]
+            },
+            "description": "Public keys a resource server uses to verify access token signatures offline."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('returns a key set', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().keys).to.be.an('array').that.is.not.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "3. Authorize — open this URL in a browser",
+          "protocolProfileBehavior": { "followRedirects": false },
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{keycloak_base_url}}/realms/{{realm}}/protocol/openid-connect/auth?response_type=code&client_id={{client_id}}&redirect_uri={{redirect_uri}}&scope={{scope}}&state={{state}}&nonce={{nonce}}",
+              "host": ["{{keycloak_base_url}}"],
+              "path": ["realms", "{{realm}}", "protocol", "openid-connect", "auth"],
+              "query": [
+                { "key": "response_type", "value": "code" },
+                { "key": "client_id", "value": "{{client_id}}" },
+                { "key": "redirect_uri", "value": "{{redirect_uri}}" },
+                { "key": "scope", "value": "{{scope}}" },
+                { "key": "state", "value": "{{state}}" },
+                { "key": "nonce", "value": "{{nonce}}" }
+              ]
+            },
+            "description": "Sending this from Postman only fetches the login page HTML — the login itself must happen in a browser. Run it once, then open the URL printed in the Postman console, sign in, and copy the `code` query parameter from the address bar into the `auth_code` environment variable.\n\nRedirects are not followed here on purpose: if Postman already holds a Keycloak SSO cookie, Keycloak answers 302 straight to the redirect URI, and the script below captures the code from the Location header instead of burning it against the BFF."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.variables.get('redirect_uri')) {",
+                  "  throw new Error('`redirect_uri` is empty. It must match one of the client\\'s Valid redirect URIs.');",
+                  "}",
+                  "",
+                  "// Fresh state and nonce per attempt so a replayed login cannot be confused with this one.",
+                  "pm.environment.set('state', 'st-' + pm.variables.replaceIn('{{$guid}}'));",
+                  "pm.environment.set('nonce', 'nc-' + pm.variables.replaceIn('{{$guid}}'));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const state = pm.environment.get('state');",
+                  "",
+                  "const params = {",
+                  "  response_type: 'code',",
+                  "  client_id: pm.variables.get('client_id'),",
+                  "  redirect_uri: pm.variables.replaceIn('{{redirect_uri}}'),",
+                  "  scope: pm.variables.get('scope'),",
+                  "  state: state,",
+                  "  nonce: pm.environment.get('nonce')",
+                  "};",
+                  "const loginUrl = pm.variables.get('keycloak_base_url') + '/realms/' + pm.variables.get('realm') +",
+                  "  '/protocol/openid-connect/auth?' +",
+                  "  Object.keys(params).map((k) => k + '=' + encodeURIComponent(params[k])).join('&');",
+                  "",
+                  "if (pm.response.code === 302) {",
+                  "  // An SSO session already exists, so Keycloak issued the code without showing a login form.",
+                  "  const location = pm.response.headers.get('Location') || '';",
+                  "  const returned = new URL(location);",
+                  "  const code = returned.searchParams.get('code');",
+                  "",
+                  "  pm.test('redirect carries an authorization code', () => pm.expect(code).to.be.a('string').and.not.empty);",
+                  "  pm.test('state matches the one sent', () => pm.expect(returned.searchParams.get('state')).to.eql(state));",
+                  "",
+                  "  if (code) {",
+                  "    pm.environment.set('auth_code', code);",
+                  "    console.log('Existing SSO session: authorization code captured automatically. Run request 4 next.');",
+                  "  } else {",
+                  "    console.log('Keycloak redirected without a code: ' + location);",
+                  "  }",
+                  "  return;",
+                  "}",
+                  "",
+                  "pm.test('login page served (not an invalid client/redirect error)', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "console.log('1) Open this URL in a browser and sign in:');",
+                  "console.log(loginUrl);",
+                  "console.log('2) After the redirect, copy the `code` query parameter into the `auth_code` environment variable.');",
+                  "console.log('3) Expected `state` on the redirect: ' + state);",
+                  "console.log('If Keycloak rejects the redirect URI, register this exact value in the client: ' + params.redirect_uri);"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "4. Token — exchange authorization code",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "grant_type", "value": "authorization_code", "type": "text" },
+                { "key": "code", "value": "{{auth_code}}", "type": "text" },
+                { "key": "redirect_uri", "value": "{{redirect_uri}}", "type": "text" },
+                { "key": "client_id", "value": "{{client_id}}", "type": "text" },
+                { "key": "client_secret", "value": "{{client_secret}}", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{keycloak_base_url}}/realms/{{realm}}/protocol/openid-connect/token",
+              "host": ["{{keycloak_base_url}}"],
+              "path": ["realms", "{{realm}}", "protocol", "openid-connect", "token"]
+            },
+            "description": "`redirect_uri` must be byte-identical to the one sent to the authorize endpoint, otherwise Keycloak rejects the exchange."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.variables.get('client_secret')) {",
+                  "  throw new Error('`client_secret` is empty. Copy it from the client\\'s Credentials tab in the Keycloak admin console — a confidential client rejects this request with invalid_client otherwise.');",
+                  "}",
+                  "if (!pm.variables.get('auth_code')) {",
+                  "  throw new Error('`auth_code` is empty. Run \"3. Authorize\", sign in via the browser, then paste the `code` parameter into the environment.');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// An authorization code is single-use: Keycloak invalidates it even when the exchange",
+                  "// fails, so this must run before anything that can throw, or a retry repeats the failure.",
+                  "pm.environment.set('auth_code', '');",
+                  "",
+                  "pm.test('code exchanged for tokens', () => pm.response.to.have.status(200));",
+                  "",
+                  "const body = pm.response.json();",
+                  "",
+                  "if (pm.response.code !== 200) {",
+                  "  // Leave the existing tokens alone — a failed exchange must not wipe a working session.",
+                  "  console.error('Token exchange failed: ' + body.error + ' — ' + (body.error_description || 'no description'));",
+                  "  console.error('The authorization code has been cleared; run request 3 again to get a fresh one.');",
+                  "  return;",
+                  "}",
+                  "",
+                  "pm.test('response carries the expected token set', () => {",
+                  "  pm.expect(body.token_type).to.eql('Bearer');",
+                  "  pm.expect(body).to.have.property('access_token');",
+                  "  pm.expect(body).to.have.property('refresh_token');",
+                  "});",
+                  "",
+                  "pm.environment.set('access_token', body.access_token);",
+                  "pm.environment.set('refresh_token', body.refresh_token);",
+                  "pm.environment.set('id_token', body.id_token || '');",
+                  "pm.environment.set('token_expires_at', new Date(Date.now() + body.expires_in * 1000).toISOString());",
+                  "",
+                  "console.log('Tokens stored. Access token valid until ' + pm.environment.get('token_expires_at'));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "5. Token — refresh",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "grant_type", "value": "refresh_token", "type": "text" },
+                { "key": "refresh_token", "value": "{{refresh_token}}", "type": "text" },
+                { "key": "client_id", "value": "{{client_id}}", "type": "text" },
+                { "key": "client_secret", "value": "{{client_secret}}", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{keycloak_base_url}}/realms/{{realm}}/protocol/openid-connect/token",
+              "host": ["{{keycloak_base_url}}"],
+              "path": ["realms", "{{realm}}", "protocol", "openid-connect", "token"]
+            },
+            "description": "Renews the access token without another browser round trip."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.variables.get('client_secret')) {",
+                  "  throw new Error('`client_secret` is empty. Copy it from the client\\'s Credentials tab in the Keycloak admin console.');",
+                  "}",
+                  "if (!pm.variables.get('refresh_token')) {",
+                  "  throw new Error('`refresh_token` is empty. Run \"4. Token — exchange authorization code\" first.');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('refreshed', () => pm.response.to.have.status(200));",
+                  "",
+                  "const body = pm.response.json();",
+                  "",
+                  "if (pm.response.code !== 200) {",
+                  "  // Keep the current tokens: an expired refresh token is recoverable by re-running the",
+                  "  // browser step, but overwriting the environment with undefined is not.",
+                  "  console.error('Refresh failed: ' + body.error + ' — ' + (body.error_description || 'no description'));",
+                  "  console.error('If the refresh token expired, run request 3 and 4 again.');",
+                  "  return;",
+                  "}",
+                  "",
+                  "pm.environment.set('access_token', body.access_token);",
+                  "pm.environment.set('refresh_token', body.refresh_token);",
+                  "pm.environment.set('id_token', body.id_token || pm.environment.get('id_token'));",
+                  "pm.environment.set('token_expires_at', new Date(Date.now() + body.expires_in * 1000).toISOString());"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "6. UserInfo",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{keycloak_base_url}}/realms/{{realm}}/protocol/openid-connect/userinfo",
+              "host": ["{{keycloak_base_url}}"],
+              "path": ["realms", "{{realm}}", "protocol", "openid-connect", "userinfo"]
+            },
+            "description": "Uses the collection-level bearer auth, so it proves {{access_token}} is accepted by the realm."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.variables.get('access_token')) {",
+                  "  throw new Error('`access_token` is empty. Run request 4 first, or paste a token into the environment.');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('access token accepted', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code !== 200) { return; }",
+                  "",
+                  "pm.test('identifies a subject', () => {",
+                  "  pm.expect(pm.response.json()).to.have.property('sub');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "7. Introspect access token",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "token", "value": "{{access_token}}", "type": "text" },
+                { "key": "token_type_hint", "value": "access_token", "type": "text" },
+                { "key": "client_id", "value": "{{client_id}}", "type": "text" },
+                { "key": "client_secret", "value": "{{client_secret}}", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{keycloak_base_url}}/realms/{{realm}}/protocol/openid-connect/token/introspect",
+              "host": ["{{keycloak_base_url}}"],
+              "path": ["realms", "{{realm}}", "protocol", "openid-connect", "token", "introspect"]
+            },
+            "description": "RFC 7662 introspection — how a resource server validates a token against the realm instead of verifying it locally."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const missing = ['client_secret', 'access_token'].filter((name) => !pm.variables.get(name));",
+                  "if (missing.length) {",
+                  "  throw new Error('Missing variable(s): ' + missing.join(', ') + '. Introspection needs client credentials and a token to inspect.');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('introspection answered', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code !== 200) { return; }",
+                  "",
+                  "pm.test('token is active', () => {",
+                  "  pm.expect(pm.response.json().active).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "8. Logout",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "refresh_token", "value": "{{refresh_token}}", "type": "text" },
+                { "key": "client_id", "value": "{{client_id}}", "type": "text" },
+                { "key": "client_secret", "value": "{{client_secret}}", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{keycloak_base_url}}/realms/{{realm}}/protocol/openid-connect/logout",
+              "host": ["{{keycloak_base_url}}"],
+              "path": ["realms", "{{realm}}", "protocol", "openid-connect", "logout"]
+            },
+            "description": "Back-channel logout: ends the SSO session and revokes the refresh token. Keycloak answers 204 with no body."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const missing = ['client_secret', 'refresh_token'].filter((name) => !pm.variables.get(name));",
+                  "if (missing.length) {",
+                  "  throw new Error('Missing variable(s): ' + missing.join(', ') + '. There is no session to end.');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const ended = [200, 204].includes(pm.response.code);",
+                  "pm.test('session ended', () => pm.expect(ended).to.be.true);",
+                  "",
+                  "if (!ended) {",
+                  "  // Keep the tokens so the user can retry; clearing them here would strip the only",
+                  "  // credentials that can end the session.",
+                  "  console.error('Logout failed with status ' + pm.response.code + ': ' + pm.response.text());",
+                  "  return;",
+                  "}",
+                  "",
+                  "pm.environment.set('access_token', '');",
+                  "pm.environment.set('refresh_token', '');",
+                  "pm.environment.set('id_token', '');",
+                  "pm.environment.set('token_expires_at', '');"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02 - BFF API",
+      "description": "The existing BFF endpoints, called with the bearer token inherited from the collection. Change {{access_token}} (or re-run the token requests) and every request here picks it up.\n\nThe BFF gateway must be running, and every request except GET /app proxies to a microservice over TCP, so those services and their databases must be up too.",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const missing = ['bff_base_url', 'global_prefix'].filter((name) => !pm.variables.get(name));",
+              "if (missing.length) {",
+              "  throw new Error('Missing variable(s): ' + missing.join(', ') + '. Set the BFF host and prefix in the environment.');",
+              "}"
+            ]
+          }
+        }
+      ],
+      "item": [
+        {
+          "name": "Health — GET /app",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{bff_base_url}}/{{global_prefix}}/app",
+              "host": ["{{bff_base_url}}"],
+              "path": ["{{global_prefix}}", "app"]
+            },
+            "description": "The only endpoint served by the gateway alone — use it to tell a BFF problem apart from a microservice problem."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('BFF is up', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Invoice — GET /app/invoice",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{bff_base_url}}/{{global_prefix}}/app/invoice",
+              "host": ["{{bff_base_url}}"],
+              "path": ["{{global_prefix}}", "app", "invoice"]
+            },
+            "description": "Proxies to the einvoice microservice over TCP, so it also verifies that service is running."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('invoice service reachable', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Create user — POST /user",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Quoc\",\n  \"lastName\": \"Chien\",\n  \"email\": \"chien.test@example.com\",\n  \"roles\": [\"507f1f77bcf86cd799439011\"]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{bff_base_url}}/{{global_prefix}}/user",
+              "host": ["{{bff_base_url}}"],
+              "path": ["{{global_prefix}}", "user"]
+            },
+            "description": "`roles` holds role `_id` values and is validated with @IsMongoId, so replace the sample id with a real one from the roles collection."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('user created', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));"]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Create product — POST /product",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Dich vu tu van\",\n  \"description\": \"Goi tu van theo gio\",\n  \"sku\": \"SKU-001\",\n  \"unit\": \"gio\",\n  \"price\": 1500000,\n  \"vatRate\": 10\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{bff_base_url}}/{{global_prefix}}/product",
+              "host": ["{{bff_base_url}}"],
+              "path": ["{{global_prefix}}", "product"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('product created', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));"]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Create invoice — POST /invoices",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"client\": {\n    \"name\": \"Cong ty TNHH ABC\",\n    \"address\": \"12 Nguyen Hue, Quan 1, TP.HCM\",\n    \"email\": \"ketoan@abc.example.com\"\n  },\n  \"items\": [\n    {\n      \"productId\": \"507f1f77bcf86cd799439011\",\n      \"name\": \"Dich vu tu van\",\n      \"quantity\": 2,\n      \"vatRate\": 10,\n      \"unitPrice\": 1500000\n    }\n  ]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{bff_base_url}}/{{global_prefix}}/invoices",
+              "host": ["{{bff_base_url}}"],
+              "path": ["{{global_prefix}}", "invoices"]
+            },
+            "description": "`productId` should point at a product created by the request above."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('invoice created', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));"]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    }
+  ]
+}
