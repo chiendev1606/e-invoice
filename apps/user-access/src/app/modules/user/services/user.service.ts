@@ -1,13 +1,13 @@
+import { TCP_SERVICES } from '@common/configuration/tcp.config';
+import { AuthorizerPattern } from '@common/constants/enums/tcp-patterns.enum';
+import { createKeycloakUserRequestType } from '@common/interfaces/gate-way/keycloak/keycloak.interface';
+import { CreateUserRequestDto } from '@common/interfaces/gate-way/user/user.dto';
+import { RequestTCPType } from '@common/interfaces/tcp/request.interface';
+import { TCPClient } from '@common/interfaces/tcp/tcp-client.interface';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
-import { UserRepository } from '../repositories/user.repository';
-import { RequestTCPType } from '@common/interfaces/tcp/request.interface';
-import { CreateUserRequestDto } from '@common/interfaces/gate-way/user/user.dto';
-import { createKeycloakUserRequestType } from '@common/interfaces/gate-way/keycloak/keycloak.interface';
-import { TCP_SERVICES } from '@common/configuration/tcp.config';
-import { TCPClient } from '@common/interfaces/tcp/tcp-client.interface';
-import { AuthorizerPattern } from '@common/constants/enums/tcp-patterns.enum';
 import { firstValueFrom, map } from 'rxjs';
+import { UserRepository } from '../repositories/user.repository';
 
 @Injectable()
 export class UserService {
@@ -26,7 +26,7 @@ export class UserService {
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
-        password: '12345',
+        password: data.password,
       },
       processID,
     });

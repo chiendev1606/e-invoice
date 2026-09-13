@@ -17,6 +17,11 @@ export class CreateUserRequestDto {
   @ApiProperty()
   email: string;
 
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty()
+  password: string;
+
   /** Role `_id` values — must be castable to ObjectId before they reach the schema. */
   @IsMongoId({ each: true })
   @ArrayNotEmpty()
