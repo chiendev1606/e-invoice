@@ -19,4 +19,5 @@ export class ResponseTCP<T> {
   }
 }
 
+export const ResponseTCPType = ResponseTCP;
 export type ResponseTCPType<T> = ResponseTCP<T>;

@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { KeycloakService } from './services/keycloak.service';
+import { KeycloakService } from './services/keycloak-http.service';
 import { KeycloakController } from './controllers/keycloak.controller';
 import { KeycloakRepository } from './repositories/keycloak.repository';
 

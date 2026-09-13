@@ -16,6 +16,9 @@ export class User extends BaseSchema {
   @Prop({ type: String, unique: true })
   email: string;
 
+  @Prop({ type: String })
+  keycloakUserId: string;
+
   @Prop({ type: [Types.ObjectId], ref: 'Role' })
   roles: Types.ObjectId[];
 }

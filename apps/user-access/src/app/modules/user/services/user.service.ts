@@ -1,20 +1,54 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
 import { UserRepository } from '../repositories/user.repository';
 import { RequestTCPType } from '@common/interfaces/tcp/request.interface';
 import { CreateUserRequestDto } from '@common/interfaces/gate-way/user/user.dto';
+import { createKeycloakUserRequestType } from '@common/interfaces/gate-way/keycloak/keycloak.interface';
+import { TCP_SERVICES } from '@common/configuration/tcp.config';
+import { TCPClient } from '@common/interfaces/tcp/tcp-client.interface';
+import { AuthorizerPattern } from '@common/constants/enums/tcp-patterns.enum';
+import { firstValueFrom, map } from 'rxjs';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly userRepo: UserRepository) {}
+  constructor(
+    private readonly userRepo: UserRepository,
+    @Inject(TCP_SERVICES.AUTHORIZER) private readonly authorizerClient: TCPClient,
+  ) {}
 
-  createUser({ data }: RequestTCPType<CreateUserRequestDto>) {
+  async createUser({ data, processID }: RequestTCPType<CreateUserRequestDto>) {
+    if (await this.userRepo.exist(data.email)) {
+      throw new BadRequestException('User already exists');
+    }
+
+    const keycloakUserId = await this.createKeycloakUser({
+      data: {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        password: '12345',
+      },
+      processID,
+    });
+
     return this.userRepo.create({
       firstName: data.firstName,
       lastName: data.lastName,
       email: data.email,
       roles: data.roles.map((role) => this.toRoleId(role)),
+      keycloakUserId: keycloakUserId,
     });
+  }
+
+  createKeycloakUser({ data, processID }: { data: createKeycloakUserRequestType; processID: string }) {
+    return firstValueFrom(
+      this.authorizerClient
+        .send<string, createKeycloakUserRequestType>(AuthorizerPattern.CREATE_KEYCLOAK_USER, {
+          processID,
+          data,
+        })
+        .pipe(map((response) => response.data)),
+    );
   }
 
   private toRoleId(role: string): Types.ObjectId {

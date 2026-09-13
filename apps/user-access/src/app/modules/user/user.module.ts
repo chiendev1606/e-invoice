@@ -17,6 +17,7 @@ import { CONFIGURATION } from '../../../configuration';
       load: [() => CONFIGURATION],
     }),
     ClientsModule.registerAsync(getTcpProvider(TCP_SERVICES.USER_ACCESS)),
+    ClientsModule.registerAsync(getTcpProvider(TCP_SERVICES.AUTHORIZER)),
     getMongoDbProvider(),
     MongooseModule.forFeature([UserDestination]),
   ],

@@ -7,4 +7,5 @@ export class RequestTCP<T> {
   }
 }
 
+export const RequestTCPType = RequestTCP;
 export type RequestTCPType<T> = RequestTCP<T>;

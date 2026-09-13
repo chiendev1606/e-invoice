@@ -22,4 +22,9 @@ export class UserRepository {
   findAndUpdate(id: string, data: Partial<User>) {
     return this.userModel.findByIdAndUpdate(id, data, { new: true }).exec();
   }
+
+  async exist(email: string) {
+    const user = await this.userModel.exists({ email }).exec();
+    return !!user;
+  }
 }

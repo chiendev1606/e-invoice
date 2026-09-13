@@ -5,7 +5,10 @@ import { ClientsModule } from '@nestjs/microservices';
 import { getTcpProvider, TCP_SERVICES } from '@common/configuration/tcp.config';
 
 @Module({
-  imports: [ClientsModule.registerAsync(getTcpProvider(TCP_SERVICES.USER_ACCESS))],
+  imports: [
+    ClientsModule.registerAsync(getTcpProvider(TCP_SERVICES.USER_ACCESS)),
+    ClientsModule.registerAsync(getTcpProvider(TCP_SERVICES.AUTHORIZER)),
+  ],
   controllers: [UserController],
   providers: [UserService],
 })
