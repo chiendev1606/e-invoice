@@ -73,7 +73,7 @@ export class KeycloakService {
     body.append('client_id', this.client_id);
     body.append('client_secret', this.client_secret);
     body.append('grant_type', 'password');
-    body.append('scope', 'openid');
+    // body.append('scope', 'openid');
     body.append('username', email);
     body.append('password', password);
 

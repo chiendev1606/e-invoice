@@ -12,7 +12,10 @@ import { map } from 'rxjs/operators';
 
 @Injectable()
 export class UserService {
-  constructor(@Inject(TCP_SERVICES.USER_ACCESS) private readonly userClient: TCPClient) {}
+  constructor(
+    @Inject(TCP_SERVICES.USER_ACCESS) private readonly userClient: TCPClient,
+    @Inject(TCP_SERVICES.AUTHORIZER) private readonly authorizerClient: TCPClient,
+  ) {}
 
   async getUser(id: string, processID: string) {
     return this.userClient.send<Model<User>>(UserPattern.GET, { data: id, processID });
@@ -23,8 +26,8 @@ export class UserService {
   }
 
   async login(data: LoginRequestDto, processID: string) {
-    return this.userClient
+    return this.authorizerClient
       .send<LoginResponseDto>(AuthorizerPattern.LOGIN_KEYCLOAK_USER, { data, processID })
-      .pipe(map((res) => new ResponseDto({ data: res.data })));
+      .pipe(map((res) => new ResponseDto({ data: (res as any)?.data || res })));
   }
 }

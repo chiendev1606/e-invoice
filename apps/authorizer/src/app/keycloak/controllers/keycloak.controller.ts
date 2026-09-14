@@ -17,7 +17,7 @@ export class KeycloakController {
   }
 
   @MessagePattern(AuthorizerPattern.LOGIN_KEYCLOAK_USER)
-  exchangeUserToken(@RequestParamsTcp() data: LoginRequestDto) {
+  exchangeUserToken(@RequestParamsTcp('data') data: LoginRequestDto) {
     return this.keycloakService.exchangeUserToken(data);
   }
 }
