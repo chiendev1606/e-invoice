@@ -5,6 +5,7 @@ import {
   exchangeClientTokenType,
   createKeycloakUserRequestType,
 } from '@common/interfaces/gate-way/keycloak/keycloak.interface';
+import { LoginResponseDto, LoginRequestDto } from '@common/interfaces/gate-way/keycloak';
 
 @Injectable()
 export class KeycloakService {
@@ -65,5 +66,20 @@ export class KeycloakService {
     }
 
     return userId;
+  }
+
+  async exchangeUserToken({ email, password }: LoginRequestDto): Promise<LoginResponseDto> {
+    const body = new URLSearchParams();
+    body.append('client_id', this.client_id);
+    body.append('client_secret', this.client_secret);
+    body.append('grant_type', 'password');
+    body.append('scope', 'openid');
+    body.append('username', email);
+    body.append('password', password);
+
+    const { data } = await this.axiosInstance.post(`/realms/${this.realm}/protocol/openid-connect/token`, body, {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    });
+    return { refreshToken: data.refresh_token, accessToken: data.access_token };
   }
 }

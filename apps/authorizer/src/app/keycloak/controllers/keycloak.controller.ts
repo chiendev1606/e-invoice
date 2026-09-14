@@ -4,6 +4,8 @@ import { MessagePattern } from '@nestjs/microservices';
 import { AuthorizerPattern } from '@common/constants/enums/tcp-patterns.enum';
 import { RequestTCP } from '@common/interfaces/tcp/request.interface';
 import { createKeycloakUserRequestType } from '@common/interfaces/gate-way/keycloak/keycloak.interface';
+import { RequestParamsTcp } from '@common/decorators/request-params-tcp.decorator';
+import { LoginRequestDto } from '@common/interfaces/gate-way/keycloak';
 
 @Controller()
 export class KeycloakController {
@@ -12,5 +14,10 @@ export class KeycloakController {
   @MessagePattern(AuthorizerPattern.CREATE_KEYCLOAK_USER)
   async createKeycloakUser(data: RequestTCP<createKeycloakUserRequestType>) {
     return this.keycloakService.createKeycloakUser(data.data);
+  }
+
+  @MessagePattern(AuthorizerPattern.LOGIN_KEYCLOAK_USER)
+  exchangeUserToken(@RequestParamsTcp() data: LoginRequestDto) {
+    return this.keycloakService.exchangeUserToken(data);
   }
 }
