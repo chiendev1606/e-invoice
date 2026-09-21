@@ -8,6 +8,7 @@ import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ClientsModule } from '@nestjs/microservices';
 import { CONFIGURATION, TConfiguration } from '../configuration';
 import { AppService } from './app.service';
+import { AuthorizerModule } from './modules/authorizer/authorizer.module';
 import { InvoiceModule } from './modules/invoice/invoice.module';
 import { ProductModule } from './modules/product/product.module';
 import { UserModule } from './modules/user/user.module';
@@ -18,6 +19,7 @@ import { UserModule } from './modules/user/user.module';
       isGlobal: true,
       load: [() => CONFIGURATION],
     }),
+    AuthorizerModule,
     InvoiceModule,
     ProductModule,
     UserModule,

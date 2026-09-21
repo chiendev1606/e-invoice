@@ -33,7 +33,7 @@ export class UserGuard implements CanActivate {
       );
 
       Logger.log(`Decoded token for processID ${processID}: ${JSON.stringify(decodedToken)}`);
-      request.userPayload = decodedToken;
+      request[MetadataKeys.userPayload] = decodedToken;
       return true;
     } catch (error) {
       Logger.error(`Access denied for processID ${processID}: User is not authorized.`, error);

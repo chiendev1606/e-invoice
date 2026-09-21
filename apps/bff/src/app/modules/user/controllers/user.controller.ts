@@ -1,5 +1,4 @@
 import { ProcessID } from '@common/decorators/processID.decorator';
-import { LoginRequestDto } from '@common/interfaces/gate-way/keycloak';
 import { CreateUserRequestDto } from '@common/interfaces/gate-way/user/user.dto';
 import { Body, Controller, Post } from '@nestjs/common';
 import { ApiProperty, ApiTags } from '@nestjs/swagger';
@@ -14,10 +13,5 @@ export class UserController {
   @ApiProperty({ description: 'Create a new user' })
   async createUser(@Body() user: CreateUserRequestDto, @ProcessID() processID: string) {
     return this.userService.createUser(user, processID);
-  }
-
-  @Post('/login')
-  async login(@Body() data: LoginRequestDto, @ProcessID() processID: string) {
-    return this.userService.login(data, processID);
   }
 }
