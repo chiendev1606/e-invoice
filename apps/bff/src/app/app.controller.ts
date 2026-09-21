@@ -27,7 +27,6 @@ export class AppController {
       })
       .pipe(
         map((res) => {
-          console.log(res);
           return new ResponseDto({ data: res.data });
         }),
       );

@@ -27,7 +27,6 @@ export class TcpLoggingInterceptor implements NestInterceptor {
             params,
           )}, handler ${handlerName}`,
         );
-        console.error(error);
         const statusCode = Number(
           error.code || error.statusCode || error.response?.statusCode || HttpStatus.INTERNAL_SERVER_ERROR,
         );

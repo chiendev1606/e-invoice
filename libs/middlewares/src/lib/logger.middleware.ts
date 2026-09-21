@@ -7,7 +7,6 @@ import { MetadataKeys } from '@common/constants/common.constant';
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
-    console.log(`[${req.method}] ${req.originalUrl}`);
     const start = Date.now();
     const { method, originalUrl, body } = req;
     const processID = getProcessID();
