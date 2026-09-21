@@ -51,6 +51,10 @@ export class UserService {
     );
   }
 
+  getUserByKeycloakId(id: string) {
+    return this.userRepo.getByKeycloakId(id);
+  }
+
   private toRoleId(role: string): Types.ObjectId {
     if (!Types.ObjectId.isValid(role)) {
       throw new BadRequestException(`Invalid role id: ${role}`);

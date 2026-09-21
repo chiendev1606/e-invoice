@@ -4,22 +4,22 @@ import { ArrayNotEmpty, IsArray, IsEmail, IsMongoId, IsNotEmpty, IsString } from
 export class CreateUserRequestDto {
   @IsString()
   @IsNotEmpty()
-  @ApiProperty()
+  @ApiProperty({ description: 'First name of the user', example: 'John' })
   firstName: string;
 
   @IsString()
   @IsNotEmpty()
-  @ApiProperty()
+  @ApiProperty({ description: 'Last name of the user', example: 'Doe' })
   lastName: string;
 
   @IsEmail()
   @IsNotEmpty()
-  @ApiProperty()
+  @ApiProperty({ description: 'Email address of the user', example: 'john.doe@example.com' })
   email: string;
 
   @IsString()
   @IsNotEmpty()
-  @ApiProperty()
+  @ApiProperty({ description: 'Password for the user account', example: 'P@ssw0rd' })
   password: string;
 
   /** Role `_id` values — must be castable to ObjectId before they reach the schema. */

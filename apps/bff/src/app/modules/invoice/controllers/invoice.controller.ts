@@ -1,5 +1,6 @@
 import { TCP_SERVICES } from '@common/configuration/tcp.config';
 import { InvoicePattern } from '@common/constants/enums/tcp-patterns.enum';
+import { Authorization } from '@common/decorators/authorization.decorator';
 import { ProcessID } from '@common/decorators/processID.decorator';
 import { CreateInvoiceDto } from '@common/interfaces/gate-way/invoice';
 import { ResponseDto } from '@common/interfaces/gate-way/response.interface';
@@ -12,6 +13,8 @@ import { map } from 'rxjs/operators';
 @Controller('invoices')
 export class InvoiceController {
   constructor(@Inject(TCP_SERVICES.INVOICES) private readonly invoiceClient: TCPClient) {}
+
+  @Authorization()
   @Post()
   createInvoice(@Body() createInvoiceDto: CreateInvoiceDto, @ProcessID() processID: string) {
     const requestData: RequestTCP<CreateInvoiceDto> = {

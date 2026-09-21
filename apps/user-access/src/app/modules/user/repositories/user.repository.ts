@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { User, UserModelName } from '@common/schemas/user.schema';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+import { get } from 'http';
 
 @Injectable()
 export class UserRepository {
@@ -12,7 +13,11 @@ export class UserRepository {
   }
 
   getById(id: string) {
-    return this.userModel.findById(id).exec();
+    return this.userModel.findById(id).populate('roles').exec();
+  }
+
+  getByKeycloakId(keycloakUserId: string) {
+    return this.userModel.findOne({ keycloakUserId }).populate('roles').exec();
   }
 
   create(data: Partial<User>) {

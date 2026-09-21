@@ -20,6 +20,7 @@ export enum UserPattern {
   CREATE = 'user.create',
   UPDATE = 'user.update',
   DELETE = 'user.delete',
+  GET_BY_KEYCLOAK_ID = 'user.get-by-keycloak-id',
 }
 
 export enum AuthorizerPattern {
@@ -27,4 +28,5 @@ export enum AuthorizerPattern {
   DELETE_KEYCLOAK_USER = 'keycloak.delete-user',
   UPDATE_KEYCLOAK_USER = 'keycloak.update-user',
   LOGIN_KEYCLOAK_USER = 'keycloak.login-user',
+  VERIFY_USER_TOKEN = 'keycloak.verify-user-token',
 }

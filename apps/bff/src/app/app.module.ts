@@ -1,8 +1,11 @@
+import { getTcpProvider, TCP_SERVICES } from '@common/configuration/tcp.config';
+import { UserGuard } from '@common/guards/user.guard';
 import { ExceptionInterceptor } from '@common/interceptors/exception.interceptor';
 import { LoggerMiddleware } from '@common/middlewares/logger.middleware';
 import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { ClientsModule } from '@nestjs/microservices';
 import { CONFIGURATION, TConfiguration } from '../configuration';
 import { AppService } from './app.service';
 import { InvoiceModule } from './modules/invoice/invoice.module';
@@ -18,8 +21,13 @@ import { UserModule } from './modules/user/user.module';
     InvoiceModule,
     ProductModule,
     UserModule,
+    ClientsModule.registerAsync(getTcpProvider(TCP_SERVICES.AUTHORIZER)),
   ],
-  providers: [AppService, { provide: APP_INTERCEPTOR, useClass: ExceptionInterceptor }],
+  providers: [
+    AppService,
+    { provide: APP_INTERCEPTOR, useClass: ExceptionInterceptor },
+    { provide: APP_GUARD, useClass: UserGuard },
+  ],
 })
 export class AppModule {
   static CONFIGURATION: TConfiguration = CONFIGURATION;

@@ -16,6 +16,7 @@ const libs = [
   'constants',
   'decorators',
   'entities',
+  'guards',
   'interceptors',
   'interfaces',
   'middlewares',
